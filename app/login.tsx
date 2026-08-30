@@ -14,6 +14,7 @@ import { API_URL } from '../constants/api';
 import { useAuthStore } from '../store/authStore';
 import { useHerdStore } from '../store/herdStore';
 import { Ionicons } from '@expo/vector-icons';
+import PasswordInput from '../components/PasswordInput';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -123,24 +124,13 @@ export default function LoginScreen() {
             Password
           </Text>
 
-          <View style={styles.inputContainer}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color="#8A948D"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor="#A4ACA6"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+         <PasswordInput
+  placeholder="Enter your password"
+  placeholderTextColor="#A4ACA6"
+  value={password}
+  onChangeText={setPassword}
+  autoComplete="current-password"
+/>
 
           <Pressable
             style={({ pressed }) => [

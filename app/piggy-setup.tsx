@@ -1,6 +1,6 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { commonStyles, colors } from '../constants/styles';
+import { colors } from '../constants/styles';
 import { useHerdStore } from '../store/herdStore';
 import { useEffect, useState } from 'react';
 import { API_URL } from '../constants/api';
@@ -73,19 +73,26 @@ useEffect(() => {
       return;
     }
 
-    if (!Number.isInteger(Number(weight))) {
-      alert('Weight must be a whole number');
+    if (!name.trim()) {
+      alert('Name is required');
       return;
     }
 
-    if (!name.trim() || !weight.trim()) {
-      alert('Name and weight are required');
-      return;
-    }
+    if (!isEditMode) {
+      if (!weight.trim()) {
+        alert('Weight is required');
+        return;
+      }
 
-    if (Number(weight) < 1) {
-      alert('Weight must be greater than 0');
-      return;
+      if (!Number.isInteger(Number(weight))) {
+        alert('Weight must be a whole number');
+        return;
+      }
+
+      if (Number(weight) < 1) {
+        alert('Weight must be greater than 0');
+        return;
+      }
     }
 
      if (name.trim().length > 30) {
@@ -104,7 +111,6 @@ useEffect(() => {
           body: JSON.stringify({
             name,
             sex,
-            weightG: Number(weight),
           }),
         });
 
@@ -186,29 +192,122 @@ useEffect(() => {
     }
   };
 
+  const progressWidth = `${
+  herdSize > 0
+    ? Math.min(
+        (currentPiggyNumber / herdSize) * 100,
+        100
+      )
+    : 0
+}%` as `${number}%`;
+
+const headerLabel = isEditMode
+  ? 'PIGGY PROFILE'
+  : isAddMode
+    ? 'ADD TO HERD'
+    : 'HERD SETUP';
+
+const headerBadge = isEditMode
+  ? 'EDIT'
+  : isAddMode
+    ? `HERD ${herdNumber || '?'}`
+    : 'STEP 2 OF 2';
+
+const heroTitle = isEditMode
+  ? 'Update piggy profile'
+  : isAddMode
+    ? 'Meet the newest member'
+    : 'Introduce your piggies';
+
+const heroDescription = isEditMode
+  ? 'Update the details below and save your changes.'
+  : isAddMode
+    ? 'Add some basic information about your new herd member.'
+    : 'Add the basics for each piggy. You can update their profiles later.';
+
 
   return (
-    <KeyboardAwareScrollView
-            style={{ flex: 1, backgroundColor: colors.background }}
-            contentContainerStyle={styles.scrollContainer}
-            enableOnAndroid
-            extraScrollHeight={80}
-            keyboardShouldPersistTaps="handled"
-          >
-      
+  <KeyboardAwareScrollView
+    style={{
+      flex: 1,
+      backgroundColor: colors.background,
+    }}
+    contentContainerStyle={styles.scrollContainer}
+    enableOnAndroid
+    extraScrollHeight={80}
+    keyboardShouldPersistTaps="handled"
+  >
+    <View style={styles.section}>
+      <View style={styles.stepRow}>
+        <Text style={styles.stepLabel}>
+          {headerLabel}
+        </Text>
 
-      <Text style={styles.pageSubtitle}>
-           {isEditMode
-            ? 'Edit piggy'
-            : isAddMode
-              ? 'Add new piggy'
-              : `Piggy ${currentPiggyNumber} of ${herdSize}`}
-      </Text>
+        <View style={styles.stepBadge}>
+          <Text style={styles.stepBadgeText}>
+            {headerBadge}
+          </Text>
+        </View>
+      </View>
 
-      <View style={styles.section}>
-      <Text style={styles.title}>Piggy Profile</Text>
+      <View style={styles.hero}>
+        <View style={styles.heroIcon}>
+          <Ionicons
+            name={
+              isEditMode
+                ? 'create-outline'
+                : isAddMode
+                  ? 'person-add-outline'
+                  : 'paw-outline'
+            }
+            size={30}
+            color={colors.orange}
+          />
+        </View>
+
+        <Text style={styles.heroTitle}>
+          {heroTitle}
+        </Text>
+
+        <Text style={styles.heroDescription}>
+          {heroDescription}
+        </Text>
+      </View>
+
+      {!isEditMode && !isAddMode && (
+        <View style={styles.progressCard}>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>
+              Herd progress
+            </Text>
+
+            <Text style={styles.progressValue}>
+              Piggy {currentPiggyNumber} of {herdSize}
+            </Text>
+          </View>
+
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: progressWidth },
+              ]}
+            />
+          </View>
+        </View>
+      )}
 
       <View style={styles.card}>
+        <Text style={styles.cardEyebrow}>
+          PIGGY DETAILS
+        </Text>
+
+        <Text style={styles.cardTitle}>
+          {isEditMode
+            ? 'Edit details'
+            : 'Tell us about this piggy'}
+        </Text>
+
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>
             Name
@@ -223,36 +322,72 @@ useEffect(() => {
 
             <TextInput
               style={styles.input}
-              placeholder="Name"
+              placeholder="Enter piggy name"
               placeholderTextColor="#A4ACA6"
               value={name}
               onChangeText={setName}
               maxLength={30}
+              autoCapitalize="words"
             />
           </View>
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>
-            Weight
+            Current weight
           </Text>
 
-          <View style={styles.inputContainer}>
-            <Ionicons
-              name="scale-outline"
-              size={20}
-              color="#8A948D"
-            />
+          {isEditMode ? (
+            <View
+              style={[
+                styles.inputContainer,
+                styles.readOnlyContainer,
+              ]}
+            >
+              <Ionicons
+                name="scale-outline"
+                size={20}
+                color="#8A948D"
+              />
 
-            <TextInput
-              style={styles.input}
-              placeholder="900 g"
-              placeholderTextColor="#A4ACA6"
-              keyboardType="numeric"
-              value={weight}
-              onChangeText={setWeight}
-            />
-          </View>
+              <View style={styles.readOnlyContent}>
+                <Text style={styles.readOnlyValue}>
+                  {weight || piggyWeight || '—'} g
+                </Text>
+
+                <Text style={styles.readOnlyHint}>
+                  Update weight through Health Checks
+                </Text>
+              </View>
+
+              <Ionicons
+                name="lock-closed-outline"
+                size={17}
+                color="#A4ACA6"
+              />
+            </View>
+          ) : (
+            <View style={styles.inputContainer}>
+              <Ionicons
+                name="scale-outline"
+                size={20}
+                color="#8A948D"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Example: 900"
+                placeholderTextColor="#A4ACA6"
+                keyboardType="numeric"
+                value={weight}
+                onChangeText={setWeight}
+              />
+
+              <Text style={styles.unitText}>
+                g
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.inputLabel}>
@@ -263,20 +398,26 @@ useEffect(() => {
           <Pressable
             style={[
               styles.sexButton,
-              sex === 'boar' && styles.selectedSexButton,
+              sex === 'boar' &&
+                styles.selectedSexButton,
             ]}
             onPress={() => setSex('boar')}
           >
             <Ionicons
               name="male-outline"
               size={18}
-              color={sex === 'boar' ? '#4E5B53' : '#8A948D'}
+              color={
+                sex === 'boar'
+                  ? colors.orange
+                  : '#8A948D'
+              }
             />
 
             <Text
               style={[
                 styles.sexButtonText,
-                sex === 'boar' && styles.selectedSexButtonText,
+                sex === 'boar' &&
+                  styles.selectedSexButtonText,
               ]}
             >
               Boar
@@ -286,20 +427,26 @@ useEffect(() => {
           <Pressable
             style={[
               styles.sexButton,
-              sex === 'sow' && styles.selectedSexButton,
+              sex === 'sow' &&
+                styles.selectedSexButton,
             ]}
             onPress={() => setSex('sow')}
           >
             <Ionicons
               name="female-outline"
               size={18}
-              color={sex === 'sow' ? '#4E5B53' : '#8A948D'}
+              color={
+                sex === 'sow'
+                  ? colors.orange
+                  : '#8A948D'
+              }
             />
 
             <Text
               style={[
                 styles.sexButtonText,
-                sex === 'sow' && styles.selectedSexButtonText,
+                sex === 'sow' &&
+                  styles.selectedSexButtonText,
               ]}
             >
               Sow
@@ -309,20 +456,26 @@ useEffect(() => {
           <Pressable
             style={[
               styles.sexButton,
-              sex === 'unknown' && styles.selectedSexButton,
+              sex === 'unknown' &&
+                styles.selectedSexButton,
             ]}
             onPress={() => setSex('unknown')}
           >
             <Ionicons
               name="help-outline"
               size={18}
-              color={sex === 'unknown' ? '#4E5B53' : '#8A948D'}
+              color={
+                sex === 'unknown'
+                  ? colors.orange
+                  : '#8A948D'
+              }
             />
 
             <Text
               style={[
                 styles.sexButtonText,
-                sex === 'unknown' && styles.selectedSexButtonText,
+                sex === 'unknown' &&
+                  styles.selectedSexButtonText,
               ]}
             >
               Unknown
@@ -338,19 +491,46 @@ useEffect(() => {
           onPress={handleSavePiggy}
         >
           <Ionicons
-            name={isEditMode ? 'save-outline' : 'add-circle-outline'}
+            name={
+              isEditMode
+                ? 'save-outline'
+                : 'add-circle-outline'
+            }
             size={20}
             color="#FFFFFF"
           />
 
           <Text style={styles.buttonText}>
-            {isEditMode ? 'Save changes' : 'Save Piggy'}
+            {isEditMode
+              ? 'Save changes'
+              : 'Save Piggy'}
           </Text>
         </Pressable>
       </View>
+
+      <View style={styles.noteCard}>
+        <View style={styles.noteIcon}>
+          <Ionicons
+            name="checkmark-circle-outline"
+            size={22}
+            color={colors.orange}
+          />
+        </View>
+
+        <View style={styles.noteContent}>
+          <Text style={styles.noteTitle}>
+            Profiles stay editable
+          </Text>
+
+          <Text style={styles.noteDescription}>
+            You can update names, weight and other details
+            later from Your Herds.
+          </Text>
+        </View>
+      </View>
     </View>
-    </KeyboardAwareScrollView>
-  );
+  </KeyboardAwareScrollView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -360,13 +540,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  title: {
-    color: colors.textDark,
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 12,
-    marginBottom: 12,
-  },
+ 
 
   card: {
     width: '100%',
@@ -392,22 +566,26 @@ const styles = StyleSheet.create({
   },
 
   sexButton: {
-    flexGrow: 1,
-    minHeight: 48,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F6F8F6',
-    borderWidth: 1,
-    borderColor: '#E4E9E5',
-    borderRadius: 15,
-  },
+  flex: 1,
+  minHeight: 48,
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 6,
+  backgroundColor: '#F6F8F6',
+  borderWidth: 1,
+  borderColor: '#E4E9E5',
+  borderRadius: 15,
+},
 
-  selectedSexButton: {
-    backgroundColor: '#E7ECE8',
-    borderColor: '#D5DDD7',
-  },
+selectedSexButton: {
+  backgroundColor: '#FBE9DC',
+  borderColor: '#F3C9AA',
+},
+
+selectedSexButtonText: {
+  color: colors.orange,
+},
 
   sexButtonText: {
     color: '#7A857D',
@@ -415,18 +593,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
-  selectedSexButtonText: {
-    color: '#4E5B53',
-  },
+  
 
-  pageSubtitle: {
-    width: '100%',
-    color: colors.textDark,
-    fontSize: 18,
-    marginBottom: 20,
-    fontWeight: '600',
-    paddingLeft: 12,
-  },
+
 
   scrollContainer: {
     flexGrow: 1,
@@ -495,5 +664,183 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
+
+  stepRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginHorizontal: 4,
+  marginBottom: 22,
+},
+
+stepLabel: {
+  color: '#89928B',
+  fontSize: 12,
+  fontWeight: '700',
+  letterSpacing: 1,
+},
+
+stepBadge: {
+  backgroundColor: '#FBE9DC',
+  paddingHorizontal: 11,
+  paddingVertical: 6,
+  borderRadius: 20,
+},
+
+stepBadgeText: {
+  color: colors.orange,
+  fontSize: 11,
+  fontWeight: '800',
+  letterSpacing: 0.5,
+},
+
+hero: {
+  alignItems: 'center',
+  marginBottom: 24,
+  paddingHorizontal: 12,
+},
+
+heroIcon: {
+  width: 66,
+  height: 66,
+  borderRadius: 22,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#FBE9DC',
+  marginBottom: 16,
+},
+
+heroTitle: {
+  color: colors.textDark,
+  fontSize: 27,
+  fontWeight: '800',
+  textAlign: 'center',
+},
+
+heroDescription: {
+  color: '#7A857D',
+  fontSize: 15,
+  lineHeight: 22,
+  textAlign: 'center',
+  marginTop: 9,
+},
+
+progressCard: {
+  backgroundColor: '#EEF3EF',
+  borderRadius: 18,
+  padding: 16,
+  marginBottom: 18,
+},
+
+progressHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 11,
+},
+
+progressLabel: {
+  color: '#4E5B53',
+  fontSize: 13,
+  fontWeight: '600',
+},
+
+progressValue: {
+  color: colors.orange,
+  fontSize: 13,
+  fontWeight: '800',
+},
+
+progressTrack: {
+  height: 8,
+  backgroundColor: '#DDE5DF',
+  borderRadius: 4,
+  overflow: 'hidden',
+},
+
+progressFill: {
+  height: '100%',
+  backgroundColor: colors.orange,
+  borderRadius: 4,
+},
+
+cardEyebrow: {
+  color: '#89928B',
+  fontSize: 11,
+  fontWeight: '800',
+  letterSpacing: 1,
+  marginBottom: 7,
+},
+
+cardTitle: {
+  color: colors.textDark,
+  fontSize: 18,
+  fontWeight: '700',
+  marginBottom: 20,
+},
+
+unitText: {
+  color: '#7A857D',
+  fontSize: 15,
+  fontWeight: '700',
+  marginLeft: 8,
+},
+
+noteCard: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#EEF3EF',
+  borderRadius: 18,
+  padding: 16,
+  marginTop: 18,
+},
+
+noteIcon: {
+  width: 42,
+  height: 42,
+  borderRadius: 14,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: colors.white,
+  marginRight: 13,
+},
+
+noteContent: {
+  flex: 1,
+},
+
+noteTitle: {
+  color: colors.textDark,
+  fontSize: 14,
+  fontWeight: '700',
+},
+
+noteDescription: {
+  color: '#738078',
+  fontSize: 13,
+  lineHeight: 18,
+  marginTop: 3,
+},
+
+readOnlyContainer: {
+  backgroundColor: '#F1F3F1',
+},
+
+readOnlyContent: {
+  flex: 1,
+  marginLeft: 11,
+},
+
+readOnlyValue: {
+  color: '#4E5B53',
+  fontSize: 15,
+  fontWeight: '700',
+},
+
+readOnlyHint: {
+  color: '#89928B',
+  fontSize: 11,
+  marginTop: 2,
+},
 
 });

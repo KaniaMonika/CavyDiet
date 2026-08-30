@@ -1,4 +1,8 @@
-import { useCallback, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { colors } from '../constants/styles';
 import { useAuthStore } from '../store/authStore';
@@ -17,6 +21,7 @@ import {
 } from '../utils/date';
 import CalendarModal from '../components/CalendarModal';
 import RecommendationsCard from '../components/RecommendationsCard';
+import HerdSwitcher from '../components/HerdSwitcher';
 
 type RecommendedFood = {
   id: number;
@@ -35,9 +40,7 @@ export default function FeedingScreen() {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
   const currentHerdId = useHerdStore((state) => state.currentHerdId);
-  const currentHerdNumber = useHerdStore(
-    (state) => state.currentHerdNumber
-  );
+  
   const [mealItems, setMealItems] = useState<MealItem[]>([]);
   const [mealSummary, setMealSummary] = useState<MealSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -50,6 +53,13 @@ export default function FeedingScreen() {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [recommendations, setRecommendations] =
   useState<Recommendation[]>([]);
+
+  useEffect(() => {
+  setMealItems([]);
+  setMealSummary(null);
+  setRecommendations([]);
+  setErrorMessage('');
+}, [currentHerdId]);
 
   const selectedDateForApi = formatDateForApi(selectedDate);
 
@@ -347,10 +357,8 @@ const updateMealItemAmount = async () => {
 
       <View style={styles.cardHeader}>
   <View style={styles.headerText}>
-    <Text style={styles.pageTitle}>Today's Feeding</Text>
-
-    <Text style={styles.herdText}>
-      Current herd: #{currentHerdNumber || '?'}
+    <Text style={styles.pageTitle}>
+      Today&apos;s Feeding
     </Text>
   </View>
 
@@ -365,9 +373,13 @@ const updateMealItemAmount = async () => {
       })
     }
   >
-    <Text style={styles.openFoodsButtonText}>Add Food</Text>
+    <Text style={styles.openFoodsButtonText}>
+      Add Food
+    </Text>
   </Pressable>
 </View>
+
+<HerdSwitcher style={styles.herdSwitcher} />
         
         {errorMessage ? (
           <Text style={styles.cardText}>{errorMessage}</Text>
@@ -456,10 +468,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  herdText: {
-    color: colors.textDark,
-    fontSize: 16,
-    fontWeight: '600',
+  herdSwitcher: {
+    alignSelf: 'stretch',
+    marginHorizontal: 12,
     marginBottom: 20,
   },
 
@@ -468,11 +479,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'stretch',
-    marginBottom: 20,
+    marginBottom: 12,
   },
 
   openFoodsButton: {
     width: 90,
+    minHeight: 48,
     borderRadius: 16,
     backgroundColor: colors.orange,
     justifyContent: 'center',

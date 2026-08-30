@@ -5,12 +5,14 @@ import {
   Text,
 } from 'react-native';
 import { router } from 'expo-router';
+
 import { API_URL } from '../constants/api';
 import { colors } from '../constants/styles';
 import { useAuthStore } from '../store/authStore';
 import { useHerdStore } from '../store/herdStore';
 import { Statistics } from '../types/statistics';
 import StatisticsOverview from '../components/StatisticsOverview';
+import HerdSwitcher from '../components/HerdSwitcher';
 
 export default function StatisticsScreen() {
   const token = useAuthStore((state) => state.token);
@@ -19,15 +21,16 @@ export default function StatisticsScreen() {
   const currentHerdId = useHerdStore(
     (state) => state.currentHerdId
   );
-  const currentHerdNumber = useHerdStore(
-    (state) => state.currentHerdNumber
+
+  const resetHerd = useHerdStore(
+    (state) => state.resetHerd
   );
-  const resetHerd = useHerdStore((state) => state.resetHerd);
 
   const [statistics, setStatistics] =
     useState<Statistics | null>(null);
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] =
+    useState('');
 
   const handleUnauthorized = () => {
     logout();
@@ -40,6 +43,7 @@ export default function StatisticsScreen() {
       return;
     }
 
+    setStatistics(null);
     setErrorMessage('');
 
     try {
@@ -61,7 +65,8 @@ export default function StatisticsScreen() {
 
       if (!response.ok) {
         setErrorMessage(
-          data.message || 'Failed to fetch statistics'
+          data.message ||
+            'Failed to fetch statistics'
         );
         return;
       }
@@ -77,15 +82,26 @@ export default function StatisticsScreen() {
   }, [token, currentHerdId]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+    >
+      <Text style={styles.title}>
+        Statistics
+      </Text>
+
+      <HerdSwitcher style={styles.herdSwitcher} />
+
       {errorMessage ? (
-        <Text style={styles.message}>{errorMessage}</Text>
+        <Text style={styles.message}>
+          {errorMessage}
+        </Text>
       ) : !statistics ? (
-        <Text style={styles.message}>Loading statistics...</Text>
+        <Text style={styles.message}>
+          Loading statistics...
+        </Text>
       ) : (
         <StatisticsOverview
           statistics={statistics}
-          currentHerdNumber={currentHerdNumber}
         />
       )}
     </ScrollView>
@@ -99,9 +115,21 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+  title: {
+    color: colors.textDark,
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+
+  herdSwitcher: {
+    marginBottom: 18,
+  },
+
   message: {
     color: colors.textDark,
     fontSize: 16,
     fontWeight: '600',
+    marginTop: 4,
   },
 });

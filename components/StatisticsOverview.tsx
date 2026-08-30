@@ -6,7 +6,6 @@ import { router } from 'expo-router';
 
 interface StatisticsOverviewProps {
   statistics: Statistics;
-  currentHerdNumber: number | null;
 }
 
 interface StatisticCardProps {
@@ -28,15 +27,10 @@ function StatisticCard({
 
 export default function StatisticsOverview({
   statistics,
-  currentHerdNumber,
 }: StatisticsOverviewProps) {
   return (
     <View>
-      <Text style={styles.title}>Statistics</Text>
-
-      <Text style={styles.subtitle}>
-        Current herd: #{currentHerdNumber || '?'}
-      </Text>
+     
 
       <Text style={styles.period}>
         Last {statistics.periodDays} days
@@ -58,23 +52,25 @@ export default function StatisticsOverview({
             Record your first meal to start seeing nutrition statistics.
           </Text>
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => router.push('/feeding')}
-          >
-            <Ionicons
-              name="nutrition-outline"
-              size={21}
-              color="#FFFFFF"
-            />
+          <View style={styles.buttonWrapper}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={() => router.push('/feeding')}
+            >
+              <Ionicons
+                name="nutrition-outline"
+                size={21}
+                color="#FFFFFF"
+              />
 
-            <Text style={styles.buttonText}>
-              Go to today&apos;s feeding
-            </Text>
-          </Pressable>
+              <Text style={styles.buttonText}>
+                Go to today&apos;s feeding
+              </Text>
+            </Pressable>
+          </View>
         </View>
       ) : (
         <>
@@ -121,19 +117,6 @@ export default function StatisticsOverview({
 }
 
 const styles = StyleSheet.create({
-  title: {
-    color: colors.textDark,
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-
-  subtitle: {
-    color: colors.textDark,
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-
   period: {
     color: '#7A857D',
     fontSize: 14,
@@ -239,6 +222,10 @@ buttonText: {
   fontSize: 16,
   fontWeight: '700',
   color: '#FFFFFF',
+},
+
+buttonWrapper: {
+  alignSelf: 'stretch',
 },
 
     

@@ -79,7 +79,29 @@ export default function SettingsScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Account</Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.settingCard,
+          pressed && styles.settingCardPressed,
+        ]}
+        onPress={() =>
+          router.push('/settings/change-username')
+        }
+      >
+        <View style={styles.settingIcon}>
+          <Text style={styles.settingIconText}>👤</Text>
+        </View>
 
+        <View style={styles.settingContent}>
+          <Text style={styles.settingTitle}>
+            Change username
+          </Text>
+
+          <Text style={styles.settingDescription}>
+            Current username: {user?.username}
+          </Text>
+        </View>
+      </Pressable>
       <Pressable
         style={({ pressed }) => [
           styles.settingCard,

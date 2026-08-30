@@ -7,6 +7,7 @@ import {
   Text,
   View,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 
 import { colors } from '../constants/styles';
@@ -77,6 +78,9 @@ export default function HomeScreen() {
   const [herdsCount, setHerdsCount] = useState(0);
   const [piggiesCount, setPiggiesCount] = useState(0);
 
+  const [isSummaryLoading, setIsSummaryLoading] =
+  useState(true);
+
   const [previewPiggies, setPreviewPiggies] =
   useState<PiggySummary[]>([]);
 
@@ -86,45 +90,52 @@ export default function HomeScreen() {
   const currentTip = tips[randomTipIndex];
 
   const fetchHomeSummary = async () => {
-    if (!token) {
-      return;
-    }
+  if (!token) {
+    setIsSummaryLoading(false);
+    return;
+  }
 
-    try {
-      const response = await fetch(`${API_URL}/herds/my`, {
+  setIsSummaryLoading(true);
+
+  try {
+    const response = await fetch(
+      `${API_URL}/herds/my`,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return;
       }
+    );
 
-      if (!Array.isArray(data)) {
-        return;
-      }
+    const data = await response.json();
 
-      const totalPiggies = data.reduce(
-        (total: number, herd: HerdSummary) =>
-          total + herd.piggies.length,
-        0
-      );
-
-      const allPiggies = data.flatMap(
-        (herd: HerdSummary) => herd.piggies
-      );
-
-      setHerdsCount(data.length);
-      setPiggiesCount(totalPiggies);
-      setPreviewPiggies(allPiggies.slice(0, 3));
-      
-    } catch (error) {
-      console.log('Home summary error:', error);
+    if (!response.ok) {
+      return;
     }
-  };
+
+    if (!Array.isArray(data)) {
+      return;
+    }
+
+    const totalPiggies = data.reduce(
+      (total: number, herd: HerdSummary) =>
+        total + herd.piggies.length,
+      0
+    );
+
+    const allPiggies = data.flatMap(
+      (herd: HerdSummary) => herd.piggies
+    );
+
+    setHerdsCount(data.length);
+    setPiggiesCount(totalPiggies);
+    setPreviewPiggies(allPiggies.slice(0, 3));
+  } catch (error) {
+    console.log('Home summary error:', error);
+  } finally {
+    setIsSummaryLoading(false);
+  }
+};
 
   useFocusEffect(
     useCallback(() => {
@@ -151,67 +162,89 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.summaryCard}>
-        <View style={styles.avatarGroup}>
-          {previewPiggies.length === 0 ? (
+  {isSummaryLoading ? (
+    <View style={styles.summaryLoading}>
+      <ActivityIndicator
+        size="large"
+        color={colors.orange}
+      />
+
+      <Text style={styles.summaryLoadingText}>
+        Loading your cavy family...
+      </Text>
+    </View>
+  ) : (
+    <>
+      <View style={styles.avatarGroup}>
+        {previewPiggies.length === 0 ? (
+          <View style={styles.avatarWrapper}>
             <View style={styles.emptyAvatar}>
-              <Text style={styles.avatarEmoji}>🐹</Text>
-            </View>
-          ) : (
-            previewPiggies.map((piggy, index) => (
-              <View
-                key={piggy.id}
-                style={[
-                  styles.avatarWrapper,
-                  index > 0 && styles.avatarOverlap,
-                ]}
-              >
-                {piggy.photo_url ? (
-                  <Image
-                    source={{
-                      uri: `${API_URL}${piggy.photo_url}`,
-                    }}
-                    style={styles.avatarImage}
-                  />
-                ) : (
-                  <View style={styles.emptyAvatar}>
-                    <Text style={styles.avatarEmoji}>🐹</Text>
-                  </View>
-                )}
-              </View>
-            ))
-          )}
-        </View>
-        
-        <View style={styles.summaryContent}>
-          <Text style={styles.summaryTitle}>
-            Your Cavy Family
-          </Text>
-
-          <View style={styles.summaryStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {piggiesCount}
-              </Text>
-
-              <Text style={styles.statLabel}>
-                Piggies
-              </Text>
-            </View>
-
-            <View style={styles.statDivider} />
-
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {herdsCount}
-              </Text>
-
-              <Text style={styles.statLabel}>
-                Herds
+              <Text style={styles.avatarEmoji}>
+                🐹
               </Text>
             </View>
           </View>
+        ) : (
+          previewPiggies.map((piggy, index) => (
+            <View
+              key={piggy.id}
+              style={[
+                styles.avatarWrapper,
+                index > 0 &&
+                  styles.avatarOverlap,
+              ]}
+            >
+              {piggy.photo_url ? (
+                <Image
+                  source={{
+                    uri: `${API_URL}${piggy.photo_url}`,
+                  }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <View style={styles.emptyAvatar}>
+                  <Text style={styles.avatarEmoji}>
+                    🐹
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))
+        )}
+      </View>
+
+      <View style={styles.summaryContent}>
+        <Text style={styles.summaryTitle}>
+          Your Cavy Family
+        </Text>
+
+        <View style={styles.summaryStats}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
+              {piggiesCount}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Piggies
+            </Text>
+          </View>
+
+          <View style={styles.statDivider} />
+
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
+              {herdsCount}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Herds
+            </Text>
+          </View>
         </View>
       </View>
+    </>
+  )}
+</View>
 
       <Text style={styles.sectionTitle}>Quick actions</Text>
 
@@ -307,6 +340,7 @@ const styles = StyleSheet.create({
   padding: 20,
   alignItems: 'center',
   marginBottom: 28,
+  minHeight: 170,
 
   shadowColor: '#000',
   shadowOffset: {
@@ -316,6 +350,19 @@ const styles = StyleSheet.create({
   shadowOpacity: 0.06,
   shadowRadius: 8,
   elevation: 3,
+},
+
+summaryLoading: {
+  minHeight: 130,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+summaryLoadingText: {
+  color: '#7A857D',
+  fontSize: 14,
+  fontWeight: '600',
+  marginTop: 12,
 },
 
   summaryIcon: {

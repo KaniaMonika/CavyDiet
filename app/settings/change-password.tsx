@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { colors } from '../../constants/styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import PasswordInput from '../../components/PasswordInput';
 import { API_URL } from '../../constants/api';
 import { useAuthStore } from '../../store/authStore';
 
@@ -130,45 +130,33 @@ export default function ChangePasswordScreen() {
                 Current password
               </Text>
 
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color="#8A948D"
-                />
+              
 
-                <TextInput
-                  style={styles.input}
+               <PasswordInput
+                  icon="lock-closed-outline"
                   value={currentPassword}
                   onChangeText={setCurrentPassword}
                   placeholder="Enter current password"
                   placeholderTextColor="#A4ACA6"
-                  secureTextEntry
-                  autoCapitalize="none"
+                  autoComplete="current-password"
                 />
-              </View>
+              
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>New password</Text>
 
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="key-outline"
-                  size={20}
-                  color="#8A948D"
-                />
+             
 
-                <TextInput
-                  style={styles.input}
+                 <PasswordInput
+                  icon="key-outline"
                   value={newPassword}
                   onChangeText={setNewPassword}
                   placeholder="Enter new password"
                   placeholderTextColor="#A4ACA6"
-                  secureTextEntry
-                  autoCapitalize="none"
+                  autoComplete="new-password"
                 />
-              </View>
+              
             </View>
 
             <View style={styles.inputGroupLast}>
@@ -176,23 +164,17 @@ export default function ChangePasswordScreen() {
                 Confirm new password
               </Text>
 
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={20}
-                  color="#8A948D"
-                />
+             
 
-                <TextInput
-                  style={styles.input}
+                <PasswordInput
+                  icon="checkmark-circle-outline"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   placeholder="Repeat new password"
                   placeholderTextColor="#A4ACA6"
-                  secureTextEntry
-                  autoCapitalize="none"
+                  autoComplete="new-password"
                 />
-              </View>
+              
             </View>
           </View>
 

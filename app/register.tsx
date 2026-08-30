@@ -11,6 +11,7 @@ import { commonStyles, colors } from '../constants/styles';
 import { useState } from 'react';
 import { API_URL } from '../constants/api';
 import { Ionicons } from '@expo/vector-icons';
+import PasswordInput from '../components/PasswordInput';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
@@ -151,48 +152,27 @@ export default function RegisterScreen() {
               Password
             </Text>
 
-            <View style={styles.inputContainer}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color="#8A948D"
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                placeholderTextColor="#A4ACA6"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
+           <PasswordInput
+            placeholder="Enter your password"
+            placeholderTextColor="#A4ACA6"
+            value={password}
+            onChangeText={setPassword}
+            autoComplete="new-password"
+          />
           </View>
 
           <Text style={styles.inputLabel}>
             Confirm password
           </Text>
 
-          <View style={styles.inputContainer}>
-            <Ionicons
-              name="checkmark-circle-outline"
-              size={20}
-              color="#8A948D"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Repeat your password"
-              placeholderTextColor="#A4ACA6"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+         <PasswordInput
+            icon="checkmark-circle-outline"
+            placeholder="Confirm your password"
+            placeholderTextColor="#A4ACA6"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            autoComplete="new-password"
+          />
 
           <Pressable
             style={({ pressed }) => [
@@ -215,7 +195,7 @@ export default function RegisterScreen() {
           <View style={styles.authLinkContainer}>
             <Text style={styles.authLinkText}>Already have an account?</Text>
 
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable onPress={() => router.push('/login')}>
               <Text style={styles.authLink}>Sign in</Text>
             </Pressable>
           </View>

@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import AppNavbar from '../components/AppNavbar';
 import AppFooter from '../components/AppFooter';
+import SessionGuard from '../components/SessionGuard';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -12,6 +13,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <SessionGuard />
     <AppNavbar />
       <Stack initialRouteName="index">
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -32,6 +34,7 @@ export default function RootLayout() {
         <Stack.Screen name="piggies" options={{ headerShown: false }} />
         <Stack.Screen name="piggies/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="settings/index" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/change-username" options={{ headerShown: false }} />
         <Stack.Screen name="settings/change-password" options={{ headerShown: false }} />
         <Stack.Screen name="about/index" options={{ headerShown: false }} />
       </Stack>
